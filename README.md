@@ -77,6 +77,9 @@ docker compose down --volumes
 [`docs/RUNBOOK.md`](docs/RUNBOOK.md), а краткое описание и типовые ошибки — в
 [`docs/QUICK_REFERENCE.md`](docs/QUICK_REFERENCE.md).
 
+Фактическая последовательность работы и встреченные проблемы описаны в
+[`docs/IMPLEMENTATION_NOTES.md`](docs/IMPLEMENTATION_NOTES.md).
+
 ## Безопасность
 
 - контейнер приложения запускается не от `root`;

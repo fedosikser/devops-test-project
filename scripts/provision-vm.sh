@@ -18,20 +18,28 @@ if ! id "${DEPLOYER_USER}" >/dev/null 2>&1; then
   adduser --disabled-password --gecos "" "${DEPLOYER_USER}"
 fi
 usermod -aG sudo "${DEPLOYER_USER}"
+printf '%s ALL=(ALL) NOPASSWD:ALL\n' "${DEPLOYER_USER}" > "/etc/sudoers.d/${DEPLOYER_USER}"
+chmod 0440 "/etc/sudoers.d/${DEPLOYER_USER}"
 
 install -d -m 700 -o "${DEPLOYER_USER}" -g "${DEPLOYER_USER}" "/home/${DEPLOYER_USER}/.ssh"
 install -m 600 -o "${DEPLOYER_USER}" -g "${DEPLOYER_USER}" "${PUBLIC_KEY_FILE}" "/home/${DEPLOYER_USER}/.ssh/authorized_keys"
 
 apt-get update
 apt-get install -y ca-certificates curl ufw
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
-. /etc/os-release
-printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' \
-  "$(dpkg --print-architecture)" "${UBUNTU_CODENAME:-$VERSION_CODENAME}" > /etc/apt/sources.list.d/docker.list
-apt-get update
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+  . /etc/os-release
+  printf 'deb [arch=%s signed-by=%s] https://download.docker.com/linux/ubuntu %s stable\n' \
+    "$(dpkg --print-architecture)" "/etc/apt/keyrings/docker.asc" \
+    "${UBUNTU_CODENAME:-$VERSION_CODENAME}" > /etc/apt/sources.list.d/docker.list
+  apt-get update
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+fi
+
+systemctl enable --now docker
 usermod -aG docker "${DEPLOYER_USER}"
 
 install -d -m 0755 /etc/ssh/sshd_config.d

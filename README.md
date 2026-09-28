@@ -73,6 +73,10 @@ docker compose down --volumes
 [`docs/VM_SETUP.md`](docs/VM_SETUP.md). Для воспроизводимой подготовки машины
 добавлен [`scripts/provision-vm.sh`](scripts/provision-vm.sh).
 
+Полный алгоритм от создания VM до Pull Request приведён в
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md), а краткое описание и типовые ошибки — в
+[`docs/QUICK_REFERENCE.md`](docs/QUICK_REFERENCE.md).
+
 ## Безопасность
 
 - контейнер приложения запускается не от `root`;

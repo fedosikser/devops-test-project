@@ -80,6 +80,9 @@ docker compose down --volumes
 Фактическая последовательность работы и встреченные проблемы описаны в
 [`docs/IMPLEMENTATION_NOTES.md`](docs/IMPLEMENTATION_NOTES.md).
 
+Скриншоты проверки Docker, healthcheck, persistence и настроек Ubuntu VM
+собраны отдельно в каталоге [`screenshots/`](screenshots/).
+
 ## Безопасность
 
 - контейнер приложения запускается не от `root`;

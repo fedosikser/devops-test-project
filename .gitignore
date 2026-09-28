@@ -43,11 +43,11 @@ wheels/
 .DS_Store
 Thumbs.db
 
-# Verification artifacts
+# Local access data
+.private/
+
+# Temporary verification render files
 docs/evidence/
-!docs/evidence/
-docs/evidence/*
-!docs/evidence/*.png
 
 # Logs
 *.log

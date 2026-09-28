@@ -12,17 +12,17 @@
 политику deny для входящих подключений и разрешает только SSH и HTTP. В SSH
 отключены вход по паролю и вход `root`.
 
-![Ubuntu VM security](evidence/vm-security.png)
+![Ubuntu VM security](../screenshots/vm-security.png)
 
 ## Запущенные контейнеры
 
-![docker compose ps](evidence/docker-ps.png)
+![docker compose ps](../screenshots/docker-ps.png)
 
 ## Health check
 
 `GET /health` вернул `status: healthy` и `database: connected`.
 
-![curl health](evidence/health.png)
+![curl health](../screenshots/health.png)
 
 ## Сохранение данных
 
@@ -30,11 +30,11 @@
 `docker compose up -d --wait` следующая запись получила ID 2, что подтверждает
 сохранение данных в named volume.
 
-![persistence check](evidence/persistence.png)
+![persistence check](../screenshots/persistence.png)
 
 ## Размер образа
 
-![docker images](evidence/images.png)
+![docker images](../screenshots/images.png)
 
 Скриншоты содержат только технический вывод тестового окружения; значения из
 локального `.env` в них не выводятся.

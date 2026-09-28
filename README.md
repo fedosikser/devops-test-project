@@ -1,38 +1,92 @@
 # DevOps Test Project
 
-Простое веб-приложение на Flask с подключением к PostgreSQL для тестирования DevOps навыков.
+Контейнеризованное Flask-приложение с PostgreSQL. Стек запускается одной
+командой, проверяет готовность базы перед стартом приложения и сохраняет данные
+в Docker volume.
 
-## 📋 Описание
+## Архитектура
 
-Приложение предоставляет следующие endpoints:
-- `GET /` - Главная страница (статус приложения)
-- `GET /health` - Health check (проверка подключения к БД)
-- `GET /data` - Тестовый endpoint для работы с БД
+- `web`: Flask под Gunicorn, непривилегированный пользователь `app`, порт 5000;
+- `db`: PostgreSQL 16 Alpine с persistent volume;
+- `backend`: изолированная bridge-сеть между сервисами;
+- наружу опубликован только HTTP-порт приложения (по умолчанию `80`).
 
-## 🚀 Локальный запуск (без Docker)
+## Быстрый старт
 
-### Требования:
-- Python 3.8+
-- PostgreSQL 13+
-
-### Установка:
+Требуются Docker Engine и Docker Compose v2.
 
 ```bash
-# Создать виртуальное окружение
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# или
-venv\Scripts\activate  # Windows
+cp .env.example .env
+```
 
-# Установить зависимости
-pip install -r app/requirements.txt
+Замените демонстрационное значение `DB_PASSWORD` в `.env` на стойкий локальный
+пароль. Файл `.env` исключён из Git и Docker build context.
 
-# Настроить переменные окружения
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_NAME=testdb
-export DB_USER=postgres
-export DB_PASSWORD=secret
+```bash
+docker compose up -d --build --wait
+curl --fail http://localhost/health
+```
 
-# Запустить приложение
-python app/app.py
+Ожидаемый статус — `healthy`, а поле `database` — `connected`.
+
+Если порт 80 занят или требует дополнительных прав, задайте в `.env`, например,
+`HTTP_PORT=8080` и используйте `http://localhost:8080`.
+
+## Endpoints
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| GET | `/` | Статус приложения |
+| GET | `/health` | Проверка соединения с PostgreSQL |
+| GET/POST | `/data` | Создание тестовой записи и проверка БД |
+
+## Проверка persistence
+
+Скрипт создаёт запись, перезапускает Compose-стек без удаления volume и
+убеждается, что ID следующей записи увеличился:
+
+```bash
+./scripts/verify.sh
+```
+
+При нестандартном порте используйте, например:
+
+```bash
+BASE_URL=http://localhost:8080 ./scripts/verify.sh
+```
+
+Остановить сервисы без удаления данных:
+
+```bash
+docker compose down
+```
+
+Полностью удалить сервисы вместе с данными можно только явно:
+
+```bash
+docker compose down --volumes
+```
+
+## Развертывание на VM
+
+Пошаговая настройка Ubuntu, пользователя `deployer`, SSH и UFW описана в
+[`docs/VM_SETUP.md`](docs/VM_SETUP.md). Для воспроизводимой подготовки машины
+добавлен [`scripts/provision-vm.sh`](scripts/provision-vm.sh).
+
+Полный алгоритм от создания VM до Pull Request приведён в
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md), а краткое описание и типовые ошибки — в
+[`docs/QUICK_REFERENCE.md`](docs/QUICK_REFERENCE.md).
+
+Фактическая последовательность работы и встреченные проблемы описаны в
+[`docs/IMPLEMENTATION_NOTES.md`](docs/IMPLEMENTATION_NOTES.md).
+
+Скриншоты проверки Docker, healthcheck, persistence и настроек Ubuntu VM
+собраны отдельно в каталоге [`screenshots/`](screenshots/).
+
+## Безопасность
+
+- контейнер приложения запускается не от `root`;
+- секреты передаются через локальный `.env`, который не коммитится;
+- `.dockerignore` исключает секреты и служебные файлы из build context;
+- порт PostgreSQL не публикуется на хост;
+- production-сервер Gunicorn запускается без Flask debug mode.

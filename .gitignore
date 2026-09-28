@@ -28,6 +28,8 @@ wheels/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 .env.local
 
 # IDE
@@ -40,6 +42,9 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+
+# Verification artifacts
+docs/evidence/
 
 # Logs
 *.log

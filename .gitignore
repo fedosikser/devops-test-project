@@ -45,6 +45,9 @@ Thumbs.db
 
 # Verification artifacts
 docs/evidence/
+!docs/evidence/
+docs/evidence/*
+!docs/evidence/*.png
 
 # Logs
 *.log
